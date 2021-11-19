@@ -3,15 +3,40 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
+use App\Models\DetaillevelModel;
+use App\Models\LevelModel;
 
 class LevelController extends BaseController
 {
-    public function index()
+    public $level;
+    public $detail_level;
+
+    public function __construct()
     {
-        return view('level/index');
+        $this->level = new LevelModel();
+        $this->detail_level = new DetaillevelModel();
     }
 
-    public function detaillevel(){
-        return view('level/detail_level');
+
+    public function index()
+    {
+        $data = $this->level->findAll();
+        return view('level/index', ['data' => $data]);
+    }
+
+    public function detaillevel()
+    {
+        $db = \Config\Database::connect();
+        $builder = $db->table('detail_level');
+        $builder->select('*');
+        $builder->join('level', 'level.id=detail_level.level_id');
+        $builder->join('user', 'user.id=detail_level.user_id');
+        $query = $builder->get();
+        $data = $query->getResult();
+
+        // dd($data);
+        return view('level/detail_level', [
+            'data' => $data
+        ]);
     }
 }
